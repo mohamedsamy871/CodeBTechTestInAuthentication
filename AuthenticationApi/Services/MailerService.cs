@@ -8,13 +8,11 @@ namespace AuthenticationApi.Services
     public interface IMailer
     {
         Task SendEmailAsync(string email, string subject, string body);
-
     }
     public class MailerService: IMailer
     {
         private readonly StmpSettings _stmpSettings;
         private readonly IWebHostEnvironment _env;
-
         public MailerService(IOptions<StmpSettings> stmpSettings, IWebHostEnvironment env)
         {
             _stmpSettings = stmpSettings.Value;
@@ -36,25 +34,14 @@ namespace AuthenticationApi.Services
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     await client.ConnectAsync(_stmpSettings.Server, _stmpSettings.Port, false);
-                    //if (_env.IsDevelopment())
-                    //{
-                    //    await client.ConnectAsync(_stmpSettings.Server, _stmpSettings.Port, false);
-                    //}
-                    //else
-                    //{
-                    //    await client.ConnectAsync(_stmpSettings.Server, _stmpSettings.Port, true);
-                    //}
                     await client.AuthenticateAsync(_stmpSettings.Username, _stmpSettings.Password);
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
-
                 }
             }
             catch (Exception ex)
             {
-
-                await _logging.SendLogToDb(new LogData { Exception = ex, isClientSide = false });
-                //throw new InvalidOperationException(ex.Message);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
